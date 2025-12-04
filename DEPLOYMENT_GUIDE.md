@@ -66,7 +66,7 @@ aws sts get-caller-identity
 
 ```powershell
 # Generate unique bucket name
-$BUCKET_NAME = "devops-demo-frontend-$(Get-Random -Maximum 9999)"
+$BUCKET_NAME = "devdem-$(Get-Random -Maximum 9999)"
 
 # Create bucket
 aws s3api create-bucket --bucket $BUCKET_NAME --region us-east-1
@@ -164,7 +164,7 @@ Write-Host "✅ Security Group created: $SG_ID"
 
 1. Go to: https://console.aws.amazon.com/ec2
 2. Click **Launch Instance**
-3. **Name**: `devops-demo-backend`
+3. **Name**: `devdemo`
 4. **AMI**: Amazon Linux 2023
 5. **Instance type**: t3.micro
 6. **Key pair**: devops-demo-key

@@ -92,7 +92,7 @@ Use this checklist to ensure all steps are completed for deployment.
 
 ### Build Docker Image
 - [ ] Navigate to `backend/` directory
-- [ ] Run `docker build -t devops-demo-backend .`
+- [ ] Run `docker build -t devdemo-backend .`
 - [ ] Verify image built successfully
 
 ### Push to ECR

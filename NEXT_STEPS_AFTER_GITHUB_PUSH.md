@@ -67,7 +67,7 @@ aws sts get-caller-identity
 
 ```powershell
 # Generate unique bucket name
-$BUCKET_NAME = "devops-demo-frontend-$(Get-Random -Maximum 9999)"
+$BUCKET_NAME = "devdem-$(Get-Random -Maximum 9999)"
 
 # Create bucket
 aws s3api create-bucket --bucket $BUCKET_NAME --region us-east-1
@@ -115,10 +115,10 @@ See `MANUAL_AWS_SETUP_GUIDE.md` for CLI commands.
 
 ```powershell
 # Create repository
-aws ecr create-repository --repository-name devops-demo-backend --region us-east-1
+aws ecr create-repository --repository-name devdemo-backend --region us-east-1
 
 # Get repository URI
-$ECR_URI = aws ecr describe-repositories --repository-names devops-demo-backend --query 'repositories[0].repositoryUri' --output text
+$ECR_URI = aws ecr describe-repositories --repository-names devdemo-backend --query 'repositories[0].repositoryUri' --output text
 
 # Save for later
 $ECR_URI | Out-File ecr-uri.txt
@@ -146,7 +146,7 @@ Write-Host "⚠️  IMPORTANT: Keep this file secure!"
 
 1. Go to: https://console.aws.amazon.com/ec2
 2. Click **Launch Instance**
-3. **Name**: `devops-demo-backend`
+3. **Name**: `devdemo`
 4. **AMI**: Amazon Linux 2023
 5. **Instance type**: t3.micro
 6. **Key pair**: devops-demo-key
@@ -254,10 +254,10 @@ $ACCOUNT_ID = aws sts get-caller-identity --query Account --output text
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin "$ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com"
 
 # Build Docker image
-docker build -t devops-demo-backend .
+docker build -t devdemo-backend .
 
 # Tag image
-docker tag devops-demo-backend:latest "$ECR_URI:latest"
+docker tag devdemo-backend:latest "$ECR_URI:latest"
 
 # Push to ECR
 docker push "$ECR_URI:latest"
@@ -278,7 +278,7 @@ Write-Host "Command: ssh -i devops-demo-key.pem ec2-user@$EC2_IP"
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.us-east-1.amazonaws.com
 
 # Get ECR URI
-ECR_URI=$(aws ecr describe-repositories --repository-names devops-demo-backend --query 'repositories[0].repositoryUri' --output text)
+ECR_URI=$(aws ecr describe-repositories --repository-names devdemo-backend --query 'repositories[0].repositoryUri' --output text)
 
 # Pull image
 docker pull $ECR_URI:latest
@@ -311,7 +311,7 @@ exit
 AWS_ACCESS_KEY_ID: (Get from AWS IAM Console)
 AWS_SECRET_ACCESS_KEY: (Get from AWS IAM Console)
 AWS_REGION: us-east-1
-ECR_REPOSITORY: devops-demo-backend
+ECR_REPOSITORY: devdemo-backend
 S3_BUCKET: $(Get-Content bucket-name.txt)
 CLOUDFRONT_DISTRIBUTION_ID: $(Get-Content cloudfront-id.txt)
 EC2_HOST: $(Get-Content ec2-ip.txt)
@@ -348,7 +348,7 @@ Get-Content devops-demo-key.pem
 | `AWS_ACCESS_KEY_ID` | Your AWS access key | AWS Console → IAM → Users → Security credentials |
 | `AWS_SECRET_ACCESS_KEY` | Your AWS secret key | AWS Console → IAM → Users → Security credentials |
 | `AWS_REGION` | `us-east-1` | Your AWS region |
-| `ECR_REPOSITORY` | `devops-demo-backend` | ECR repository name |
+| `ECR_REPOSITORY` | `devdemo-backend` | ECR repository name |
 | `S3_BUCKET` | From `bucket-name.txt` | S3 bucket name |
 | `CLOUDFRONT_DISTRIBUTION_ID` | From `cloudfront-id.txt` | CloudFront distribution ID |
 | `EC2_HOST` | From `ec2-ip.txt` | EC2 public IP |

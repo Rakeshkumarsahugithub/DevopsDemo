@@ -56,7 +56,7 @@ aws sts get-caller-identity
 
 ```powershell
 # Set variables
-$BUCKET_NAME = "devops-demo-frontend-$(Get-Random -Maximum 9999)"
+$BUCKET_NAME = "devdem-$(Get-Random -Maximum 9999)"
 $REGION = "us-east-1"
 
 # Create bucket
@@ -156,7 +156,7 @@ Create `cloudfront-config.json`:
     "Quantity": 1,
     "Items": [
       {
-        "Id": "S3-devops-demo-frontend",
+        "Id": "S3-devdem-frontend",
         "DomainName": "YOUR_BUCKET_NAME.s3-website-us-east-1.amazonaws.com",
         "CustomOriginConfig": {
           "HTTPPort": 80,
@@ -167,7 +167,7 @@ Create `cloudfront-config.json`:
     ]
   },
   "DefaultCacheBehavior": {
-    "TargetOriginId": "S3-devops-demo-frontend",
+    "TargetOriginId": "S3-devdem-frontend",
     "ViewerProtocolPolicy": "redirect-to-https",
     "AllowedMethods": {
       "Quantity": 3,
@@ -249,12 +249,12 @@ Write-Host "Note: Distribution deployment takes 15-20 minutes"
 ```powershell
 # Create ECR repository for backend
 aws ecr create-repository `
-  --repository-name devops-demo-backend `
+  --repository-name devdemo-backend `
   --region $REGION
 
 # Get repository URI
 $ECR_URI = aws ecr describe-repositories `
-  --repository-names devops-demo-backend `
+  --repository-names devdemo-backend `
   --query 'repositories[0].repositoryUri' `
   --output text
 
@@ -415,7 +415,7 @@ $INSTANCE_ID = aws ec2 run-instances `
   --security-group-ids $SG_ID `
   --iam-instance-profile Name=devops-demo-ec2-profile `
   --user-data file://user-data.sh `
-  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=devops-demo-backend}]' `
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=devdemo}]' `
   --query 'Instances[0].InstanceId' `
   --output text
 
@@ -616,10 +616,10 @@ aws ecr get-login-password --region us-east-1 | `
   docker login --username AWS --password-stdin "$ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com"
 
 # Build image
-docker build -t devops-demo-backend .
+docker build -t devdemo-backend .
 
 # Tag image
-docker tag devops-demo-backend:latest "$ECR_URI:latest"
+docker tag devdemo-backend:latest "$ECR_URI:latest"
 
 # Push to ECR
 docker push "$ECR_URI:latest"
@@ -675,7 +675,7 @@ Create a file `deployment-info.txt` with all the values:
 AWS_ACCESS_KEY_ID: (Get from AWS IAM Console)
 AWS_SECRET_ACCESS_KEY: (Get from AWS IAM Console)
 AWS_REGION: us-east-1
-ECR_REPOSITORY: devops-demo-backend
+ECR_REPOSITORY: devdemo-backend
 S3_BUCKET: $(Get-Content bucket-name.txt)
 CLOUDFRONT_DISTRIBUTION_ID: $(Get-Content cloudfront-id.txt)
 EC2_HOST: $(Get-Content ec2-ip.txt)
@@ -848,7 +848,7 @@ aws s3 rm s3://$BUCKET_NAME --recursive
 aws s3api delete-bucket --bucket $BUCKET_NAME
 
 # Delete ECR repository
-aws ecr delete-repository --repository-name devops-demo-backend --force
+aws ecr delete-repository --repository-name devdemo-backend --force
 
 # Terminate EC2 instance
 aws ec2 terminate-instances --instance-ids $INSTANCE_ID

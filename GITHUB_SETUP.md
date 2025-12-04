@@ -41,7 +41,7 @@ Add these secrets one by one:
 | `AWS_ACCESS_KEY_ID` | Your AWS access key | AWS IAM Console → Users → Security credentials |
 | `AWS_SECRET_ACCESS_KEY` | Your AWS secret key | AWS IAM Console → Users → Security credentials |
 | `AWS_REGION` | AWS region | `us-east-1` (or your preferred region) |
-| `ECR_REPOSITORY` | ECR repository name | `devops-demo-backend` |
+| `ECR_REPOSITORY` | ECR repository name | `devdemo-backend` |
 | `S3_BUCKET` | S3 bucket name | From Terraform output: `terraform output s3_bucket_name` |
 | `CLOUDFRONT_DISTRIBUTION_ID` | CloudFront distribution ID | From Terraform output: `terraform output cloudfront_distribution_id` |
 | `EC2_HOST` | EC2 public IP | From Terraform output: `terraform output ec2_public_ip` |

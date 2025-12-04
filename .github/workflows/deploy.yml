@@ -60,11 +60,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to EC2
+      - name: Deploy to EC2 with Docker
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          DEPLOY_METHOD: ${{ secrets.DEPLOY_METHOD }}
         run: |
           # Save SSH key
           echo "$EC2_SSH_KEY" > private_key.pem
@@ -75,21 +76,48 @@ jobs:
           
           # Deploy on EC2
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'ENDSSH'
-            cd /home/ec2-user/app
+            cd /home/ubuntu/app
             
-            # Install dependencies
-            npm install --production
-            
-            # Stop old process
-            pm2 stop devops-backend || true
-            pm2 delete devops-backend || true
-            
-            # Start new process
-            pm2 start server.js --name devops-backend -i 1
-            pm2 save
-            
-            # Show status
-            pm2 status
+            # Check if Docker should be used
+            if [ -f "Dockerfile" ] && command -v docker &> /dev/null; then
+              echo "Deploying with Docker..."
+              
+              # Build Docker image
+              docker build -t devdemo-backend .
+              
+              # Stop and remove old container
+              docker stop devdemo-backend || true
+              docker rm devdemo-backend || true
+              
+              # Run new container
+              docker run -d \
+                --name devdemo-backend \
+                -p 5000:5000 \
+                --restart unless-stopped \
+                -e NODE_ENV=production \
+                -e PORT=5000 \
+                devdemo-backend
+              
+              # Show status
+              docker ps | grep devdemo-backend
+              
+            else
+              echo "Deploying with PM2..."
+              
+              # Install dependencies
+              npm install --production
+              
+              # Stop old process
+              pm2 stop devdemo-backend || true
+              pm2 delete devdemo-backend || true
+              
+              # Start new process
+              pm2 start server.js --name devdemo-backend -i 1
+              pm2 save
+              
+              # Show status
+              pm2 status
+            fi
           ENDSSH
           
           # Clean up

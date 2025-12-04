@@ -167,15 +167,15 @@ Access the application:
 **Backend:**
 \`\`\`bash
 cd backend
-docker build -t devops-demo-backend .
-docker run -p 5000:5000 devops-demo-backend
+docker build -t devdemo-backend .
+docker run -p 5000:5000 devdemo-backend
 \`\`\`
 
 **Frontend:**
 \`\`\`bash
 cd frontend
-docker build -t devops-demo-frontend .
-docker run -p 80:80 devops-demo-frontend
+docker build -t devdem-frontend .
+docker run -p 80:80 devdem-frontend
 \`\`\`
 
 ## ☁️ AWS Infrastructure
@@ -307,13 +307,13 @@ git push origin main
    
    # Build and push backend
    cd backend
-   docker build -t <ECR_REGISTRY>/devops-demo-backend:latest .
-   docker push <ECR_REGISTRY>/devops-demo-backend:latest
+   docker build -t <ECR_REGISTRY>/devdemo-backend:latest .
+   docker push <ECR_REGISTRY>/devdemo-backend:latest
    
    # Build and push frontend
    cd ../frontend
-   docker build -t <ECR_REGISTRY>/devops-demo-frontend:latest .
-   docker push <ECR_REGISTRY>/devops-demo-frontend:latest
+   docker build -t <ECR_REGISTRY>/devdem-frontend:latest .
+   docker push <ECR_REGISTRY>/devdem-frontend:latest
    \`\`\`
 
 3. **Deploy Frontend to S3**
@@ -329,8 +329,8 @@ git push origin main
    
    # On EC2
    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ECR_REGISTRY>
-   docker pull <ECR_REGISTRY>/devops-demo-backend:latest
-   docker run -d --name devops-backend -p 5000:5000 --restart unless-stopped <ECR_REGISTRY>/devops-demo-backend:latest
+   docker pull <ECR_REGISTRY>/devdemo-backend:latest
+   docker run -d --name devops-backend -p 5000:5000 --restart unless-stopped <ECR_REGISTRY>/devdemo-backend:latest
    \`\`\`
 
 ### Subsequent Deployments
@@ -358,7 +358,7 @@ Access at: AWS Console → CloudWatch → Dashboards → `devops-demo-dashboard`
 
 \`\`\`bash
 # View EC2 logs
-aws logs tail /aws/ec2/devops-demo-backend --follow
+aws logs tail /aws/ec2/devdemo --follow
 
 # View application logs on EC2
 ssh -i devops-demo-key.pem ec2-user@<EC2_PUBLIC_IP>
