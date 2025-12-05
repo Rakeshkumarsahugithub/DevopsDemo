@@ -68,20 +68,20 @@ A full-stack microservices application demonstrating modern DevOps practices wit
 - React 18
 - Vite
 - Modern CSS with gradients and animations
-- Nginx (production)
+- Containerization: Docker
 
 ### Backend
 - Node.js 20
 - Express.js
 - CORS enabled
 - RESTful API
+- Containerization: Docker
 
 ### DevOps
 - Docker & Docker Compose
-- AWS (S3, EC2, ECR, ALB, CloudFront, Route 53, ACM, CloudWatch)
-- Terraform
-- GitHub Actions
-- AWS Parameter Store (secrets management)
+- AWS (S3, EC2, CloudFront)
+- GitHub Actions CI/CD
+- Automated deployment pipeline
 
 ## 📦 Prerequisites
 
@@ -113,9 +113,10 @@ npm run dev
 The backend will start on `http://localhost:5000`
 
 **Available Endpoints:**
-- `GET /` - API status
-- `GET /api/messages` - Get sample messages
-- `GET /api/health` - Health check endpoint
+- `GET /` - API status: `{"message":"DevOps Demo API is running!"}`
+- `GET /api/health` - Health check: `{"status":"healthy"}`
+- `GET /api/tasks` - Sample tasks API
+- `GET /api/messages` - Sample messages API
 
 ### 3. Frontend Setup
 
@@ -182,15 +183,16 @@ docker run -p 80:80 devdem-frontend
 
 ### Infrastructure Components
 
-1. **VPC & Networking**: Custom VPC with public subnets across 2 AZs
-2. **S3 + CloudFront**: Static website hosting for frontend
-3. **EC2**: Backend application server with Docker
-4. **ECR**: Docker image registry
-5. **ALB**: Application Load Balancer for backend
-6. **Route 53**: DNS management
-7. **ACM**: SSL/TLS certificates
-8. **CloudWatch**: Logging and monitoring
-9. **IAM**: Roles and policies for secure access
+1. **S3 + CloudFront**: Static website hosting for frontend
+2. **EC2**: Backend application server with Docker
+3. **Security Groups**: Network security for EC2 instance
+4. **IAM**: Roles and policies for secure access
+
+### Current Deployment
+
+- **Backend**: EC2 instance `devdemo` at `http://18.210.24.182:5000`
+- **Frontend**: S3 bucket with CloudFront distribution
+- **Container**: `devdemo-backend` running on EC2 with Docker
 
 ### Terraform Deployment
 
@@ -274,12 +276,12 @@ Add these secrets in GitHub repository settings:
 \`\`\`
 AWS_ACCESS_KEY_ID          # AWS access key
 AWS_SECRET_ACCESS_KEY      # AWS secret key
-ECR_REGISTRY               # ECR registry URL (from Terraform output)
-BACKEND_API_URL            # Backend API URL for frontend
+S3_BUCKET                  # S3 bucket name (e.g., devdem-1234)
 CLOUDFRONT_DISTRIBUTION_ID # CloudFront distribution ID
-EC2_HOST                   # EC2 public IP
-EC2_USER                   # EC2 username (usually ec2-user)
+EC2_HOST                   # EC2 public IP: 18.210.24.182
+EC2_USER                   # EC2 username: ubuntu
 EC2_SSH_KEY                # EC2 private key content
+BACKEND_API_URL            # Backend API URL: http://18.210.24.182:5000
 \`\`\`
 
 ### Trigger Deployment
@@ -292,50 +294,51 @@ git push origin main
 
 ## 📤 Deployment
 
-### Initial Deployment
+### Current Production Deployment
 
-1. **Deploy Infrastructure**
-   \`\`\`bash
-   cd infrastructure
-   terraform apply
-   \`\`\`
+**Backend (EC2 + Docker):**
+- Instance: `devdemo` (Ubuntu 24.04.3 LTS)
+- Public IP: `18.210.24.182`
+- Container: `devdemo-backend` (running 9+ hours)
+- Status: ✅ Healthy
+- API: `http://18.210.24.182:5000`
 
-2. **Build and Push Docker Images**
-   \`\`\`bash
-   # Login to ECR
-   aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ECR_REGISTRY>
-   
-   # Build and push backend
-   cd backend
-   docker build -t <ECR_REGISTRY>/devdemo-backend:latest .
-   docker push <ECR_REGISTRY>/devdemo-backend:latest
-   
-   # Build and push frontend
-   cd ../frontend
-   docker build -t <ECR_REGISTRY>/devdem-frontend:latest .
-   docker push <ECR_REGISTRY>/devdem-frontend:latest
-   \`\`\`
+**Frontend (S3 + CloudFront):**
+- S3 Bucket: Static website hosting
+- CloudFront: Global CDN distribution
+- Deployment: Automated via GitHub Actions
 
-3. **Deploy Frontend to S3**
-   \`\`\`bash
-   cd frontend
-   npm run build
-   aws s3 sync dist/ s3://<S3_BUCKET_NAME> --delete
-   \`\`\`
+### Deployment Process
 
-4. **Deploy Backend to EC2**
-   \`\`\`bash
-   ssh -i devops-demo-key.pem ec2-user@<EC2_PUBLIC_IP>
-   
-   # On EC2
-   aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ECR_REGISTRY>
-   docker pull <ECR_REGISTRY>/devdemo-backend:latest
-   docker run -d --name devops-backend -p 5000:5000 --restart unless-stopped <ECR_REGISTRY>/devdemo-backend:latest
-   \`\`\`
+1. **Automated CI/CD**: Push to `main` branch triggers GitHub Actions
+2. **Backend**: Builds Docker image and deploys to EC2
+3. **Frontend**: Builds React app and deploys to S3
+4. **Cache**: Invalidates CloudFront cache for instant updates
 
-### Subsequent Deployments
+### Manual Deployment Commands
 
-Just push to main branch - GitHub Actions handles everything!
+**Backend:**
+\`\`\`bash
+# Connect to EC2
+ssh -i devopsdemo.pem ubuntu@18.210.24.182
+
+# Check container status
+docker ps
+
+# View logs
+docker logs devdemo-backend
+
+# Restart container if needed
+docker restart devdemo-backend
+\`\`\`
+
+**Frontend:**
+\`\`\`bash
+cd frontend
+npm run build
+aws s3 sync dist/ s3://devdem-XXXX --delete
+aws cloudfront create-invalidation --distribution-id EXXXXXXXXXX --paths "/*"
+\`\`\`
 
 ## 📊 Monitoring
 

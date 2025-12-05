@@ -107,7 +107,7 @@ function App() {
                   <li><strong>Frontend:</strong> React + Vite</li>
                   <li><strong>Backend:</strong> Express.js</li>
                   <li><strong>Communication:</strong> REST API</li>
-                  <li><strong>Containerization:</strong> Docker (Coming Soon)</li>
+                  <li><strong>Containerization:</strong> Docker</li>
                   <li><strong>Deployment:</strong> AWS (S3 + EC2)</li>
                 </ul>
               </div>
